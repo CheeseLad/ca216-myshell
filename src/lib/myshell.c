@@ -67,6 +67,7 @@ int main (int argc, char ** argv)
     char * args[MAX_ARGS];                     // pointers to arg strings
     char ** arg;                               // working pointer thru args
     char batchfile[MAX_BUFFER];
+    char batchfile_content[MAX_BUFFER];
     //char * prompt = strcat(getenv("PWD")," --> ");                    // shell prompt
     //setenv("SHELL", strcat(getenv("PWD"), "/myshell"), 1);
 
@@ -78,7 +79,16 @@ int main (int argc, char ** argv)
         if(argv[1]) {
             strcpy(batchfile, argv[1]);
             //printf("%s\n", batchfile);
-        }
+            FILE *pfile = NULL;
+            pfile = fopen(batchfile, "r");
+            if (pfile == NULL) {
+                printf("Error opening file, pleas try again");
+                return -1;
+            } // https://stackoverflow.com/questions/25823332/c-programming-read-file-and-store-it-as-a-string
+            while (fgets(batchfile_content, sizeof(batchfile_content), pfile) != NULL) { }
+            system(batchfile_content);
+            fclose(pfile);
+        } 
         
         printf("%s --> ", getenv("PWD"));                // write prompt
         //if (fgets(input, MAX_BUFFER, stdin) == NULL) continue;
@@ -100,13 +110,49 @@ int main (int argc, char ** argv)
                 }
 
             } */
+            int background_execution = 0;
+            int redirection_stdin = 0;
+            int redirection_stdout = 0;
 
-            if (args[0]) {                     // if there's anything there
+
+
+            if (!strcmp(args[3],"<")) {
+                redirection_stdin = 1;
+            }
+
+            if (!strcmp(args[5],">")) {
+                redirection_stdout = 1;
+            }
+
+
+
+            if (args[0] && background_execution == 0) {                     // if there's anything there
             
                 int status = command(args);
                 if (status == 0) {
                     system(input_before);
                 }
+            } 
+
+            if (args[0] && background_execution == 1) {
+                pid_t pid;
+
+	            int status;
+	            pid_t cpid;
+
+	            pid = fork();
+
+	            if (pid < 0) {
+		            fprintf(stderr, "Fork Failed\n");
+		            return 1;
+	            }
+	            else if (pid == 0) {
+                    while(1);
+		            int status = command(args);
+                    if (status == 0) {
+                        system(input_before);
+                    }
+	            }
             }
         }
     }
