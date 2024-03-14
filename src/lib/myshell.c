@@ -51,14 +51,16 @@
 extern char **environ;  // NULL terminated array of char *
 char *getenv(const char *name);
 
+//FILE *popen(const char *command, const char *mode); // https://www.ibm.com/docs/en/zos/2.3.0?topic=functions-popen-initiate-pipe-stream-from-process
+
 extern int errno;        // system error number 
 void syserr(char* );     // error report and abort routine 
 
-//void syserr(char * msg)   // report error code and abort
-//{
-//   fprintf(stderr,"%s: %s", strerror(errno), msg);
-//   abort(errno);
-//}
+/*void syserr(char * msg)   // report error code and abort
+{
+   fprintf(stderr,"%s: %s", strerror(errno), msg);
+   abort(errno);
+}*/
 
 int main (int argc, char ** argv)
 {
@@ -82,13 +84,14 @@ int main (int argc, char ** argv)
             FILE *pfile = NULL;
             pfile = fopen(batchfile, "r");
             if (pfile == NULL) {
-                printf("Error opening file, pleas try again");
+                printf("Error opening file, pleas try again.\n");
                 return -1;
             } // https://stackoverflow.com/questions/25823332/c-programming-read-file-and-store-it-as-a-string
             while (fgets(batchfile_content, sizeof(batchfile_content), pfile) != NULL) { }
             system(batchfile_content);
             fclose(pfile);
-        } 
+            exit(0);
+        }
         
         printf("%s --> ", getenv("PWD"));                // write prompt
         //if (fgets(input, MAX_BUFFER, stdin) == NULL) continue;
@@ -101,28 +104,33 @@ int main (int argc, char ** argv)
             *arg++ = strtok(input,SEPARATORS);   // tokenize input
             while ((*arg++ = strtok(NULL,SEPARATORS)));
                                                // last entry will be NULL 
-            
-            /* int is_background = 0;
-            for(int i = 0; i < MAX_ARGS; i++) {
-                if (!strcmp(args[i],"&")) {
-                    is_background = 1;
-                    break;
-                }
-
-            } */
+    
             int background_execution = 0;
             int redirection_stdin = 0;
             int redirection_stdout = 0;
 
 
+           int arg_count = 0;
+           for (int i = 0; args[i] != NULL; i++) {
+            arg_count++;
+           }
+           if (arg_count > 1) {
+            if (!strcmp(args[arg_count - 1],"&")) {
+                //printf("BACKGROUND EXECUTE\n");
+                background_execution = 1;
+                } 
+           }
 
-            if (!strcmp(args[3],"<")) {
-                redirection_stdin = 1;
+
+            /* if (args[3]) {
+                if (!strcmp(args[3],"<")) {
+                    redirection_stdin = 1;
+                }
             }
 
             if (!strcmp(args[5],">")) {
                 redirection_stdout = 1;
-            }
+            }*/
 
 
 
@@ -132,10 +140,40 @@ int main (int argc, char ** argv)
                 if (status == 0) {
                     system(input_before);
                 }
-            } 
+            }
+                        /*FILE *p;
+                        int ch; // https://c-for-dummies.com/blog/?p=1418
+
+                        p = popen("neofetch","r");
+                        if( p == NULL) {
+                            puts("Unable to open process");
+                            return(1);
+                        }
+                        while( (ch=fgetc(p)) != EOF)
+                            putchar(ch);
+                            pclose(p); */
+                    //FILE *pOutput = NULL;
+                    // system(input_before);
+                    //pOutput = popen(input_before, "r");
+    //char *filename = "myname.txt";
+    //if(!pOutput)  // Open myfile.txt to write it
+      //  printf("Failed to open %s.\n", filename);
+
+    //fprintf(pOutput,"%s", filename);
+    //fclose(pOutput);
+	//return 0;
+                    //printf("%s", pOutput);
+                    //int c;
+                    //if (pOutput) { // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
+                    //    while ((c = getc(pOutput)) != EOF)
+                    //        putchar(c);
+                    //    fclose(pOutput);
+                     //   }
+              //  }
+            //} 
 
             if (args[0] && background_execution == 1) {
-                pid_t pid;
+                pid_t pid; // source lecture slides
 
 	            int status;
 	            pid_t cpid;
@@ -147,7 +185,6 @@ int main (int argc, char ** argv)
 		            return 1;
 	            }
 	            else if (pid == 0) {
-                    while(1);
 		            int status = command(args);
                     if (status == 0) {
                         system(input_before);

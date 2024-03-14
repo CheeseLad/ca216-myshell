@@ -9,7 +9,8 @@ extern char **environ;
 
 int command(char * args[MAX_ARGS]) {
     if (!strcmp(args[0],"clear") || !strcmp(args[0],"clr")) { // "clear"/"clr" command
-                    system("clear");
+                    printf("\033[H"); // https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
+                    printf("\033[2J");
                     return 1;
                 }
 
@@ -20,34 +21,57 @@ int command(char * args[MAX_ARGS]) {
 
                 else if (!strcmp(args[0],"cd")) { // "dir" command
                     if (args[1] == NULL) {
-                        //setenv(getenv("PWD"), "HOME", 1);
-                        //printf("%s", getenv("PWD"));
-                            chdir(getenv("HOME"));
-                            //char newcd[MAX_BUFFER] = "PWD=";
-                            //strcat(newcd, system("pwd"));
-                            putenv("PWD=/home/jake");
-                            //system("pwd");
+                        // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
+                        FILE *dir_file_blank;
+                        char blank_pwd[MAX_BUFFER];
+                        dir_file_blank = popen("pwd", "r");
+                        if (dir_file_blank == NULL) {
+                            printf("Failed to run command\n" );
+                            return 1;
+                        }
+
+                        while (fgets(blank_pwd, sizeof(blank_pwd), dir_file_blank) != NULL) {
+                            printf("%s", blank_pwd);
+  }
                     } else if (args[1]) {
-                        if (!strcmp(args[1],"..")) {
+                        int dir_status = chdir(args[1]);
+                        if(dir_status == -1) {
+                            printf("Directory not found.\n");
+                        }
+                        if (dir_status == 0) {
+                            char newcd[MAX_BUFFER];
+                            strcpy(newcd, "PWD="); // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
+                            FILE *dir_file_pointer;
+                            char new_pwd[MAX_BUFFER];
+                            dir_file_pointer = popen("pwd", "r");
+  if (dir_file_pointer == NULL) {
+      printf("Failed to run command\n" );
+      return 1;
+  }
+
+  while (fgets(new_pwd, sizeof(new_pwd), dir_file_pointer) != NULL) {
+      //printf("%s", new_pwd);
+      strcat(newcd, new_pwd);
+  }
+
+                            //strcat(newcd, system("pwd"));
+                            //printf("%s", newcd);
+                            putenv(newcd);
+                        }
+                         
+
+                        //if (!strcmp(args[1],"..")) {
                             //system("cd ..");
-                            chdir("..");
+                            //chdir("..");
                             //system("pwd");
                             //printf("YES");
                             //printf("%s", chdir(".."));
-                        } else {
-                            chdir(args[1]);
-                            //system("pwd");
-                        }
+                        //}
                     }
                     //chdir();
                     //char test = getcwd();
                     //printf("%s", getenv("PWD"));
                     //setenv();
-                    return 1;
-                }
-
-                else if (!strcmp(args[0],"pwd")) { // "dir" command
-                    system("pwd");
                     return 1;
                 }
 
@@ -57,16 +81,12 @@ int command(char * args[MAX_ARGS]) {
                     return 1;
                 }
 
-                else if (!strcmp(args[0],"quit")|| !strcmp(args[0],"q")) {  // "quit" command
-                    printf("----------------------");
-                    printf("\nMyShell is quitting...\n");
-                    exit(0);                    // break out of 'while' loop
-                }
-
                 else if (!strcmp(args[0],"echo")) { // "dir" command
-                    if (args[1]) {
-                        printf("%s\n", args[1]);
+                    int echo_count = 0;
+                    for (int i = 1; args[i] != NULL; i++) {
+                        printf("%s ", args[i]);
                     }
+                    printf("\n");
                     return 1;
                 }
 
@@ -89,8 +109,14 @@ int command(char * args[MAX_ARGS]) {
                 else if (!strcmp(args[0], "pause")) {
                     printf("-----------------------------------------------------");
                     printf("\nMyShell is paused, press the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
-                    getchar();   
+                    getchar();  
                     return 1;
+                }
+
+                else if (!strcmp(args[0],"quit")|| !strcmp(args[0],"q")) {  // "quit" command
+                    printf("----------------------");
+                    printf("\nMyShell is quitting...\n");
+                    exit(0);                    // break out of 'while' loop
                 }
 
                 else {
