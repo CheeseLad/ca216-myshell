@@ -4,19 +4,44 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 extern char **environ;
 
+int command_clear() {
+    printf("\033[H"); // https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
+    printf("\033[2J");
+    return 1;
+}
+
+int command_pause() {
+    printf("-----------------------------------------------------");
+    printf("\nMyShell is paused, press the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
+    getchar();  
+    return 1;
+}
+
 int command(char * args[MAX_ARGS]) {
     if (!strcmp(args[0],"clear") || !strcmp(args[0],"clr")) { // "clear"/"clr" command
-                    printf("\033[H"); // https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
-                    printf("\033[2J");
-                    return 1;
-                }
-
-                else if (!strcmp(args[0],"dir") || !strcmp(args[0],"ls")) { // "dir" command
-                    system("ls -al");
-                    return 1;
+        return command_clear();
+    } else if (!strcmp(args[0],"dir") || !strcmp(args[0],"ls")) { // "dir" command
+                    //system("ls -al");
+                    // https://stackoverflow.com/questions/12489/how-do-you-get-a-directory-listing-in-c
+                    DIR *dp;
+                    struct dirent *ep;     
+                    dp = opendir ("./");
+                    if (dp != NULL) {
+                        while ((ep = readdir (dp)) != NULL)
+                            //printf("%s", ep);
+          
+                        closedir(dp);
+                        return 0;
+                    }
+                    else {
+                        perror ("Couldn't open the directory");
+                        return -1;
+                    }
                 }
 
                 else if (!strcmp(args[0],"cd")) { // "dir" command
@@ -107,10 +132,7 @@ int command(char * args[MAX_ARGS]) {
 
                 
                 else if (!strcmp(args[0], "pause")) {
-                    printf("-----------------------------------------------------");
-                    printf("\nMyShell is paused, press the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
-                    getchar();  
-                    return 1;
+                    return command_pause();
                 }
 
                 else if (!strcmp(args[0],"quit")|| !strcmp(args[0],"q")) {  // "quit" command

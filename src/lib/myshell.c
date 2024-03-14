@@ -36,6 +36,8 @@
  *******************************************************************/
 
 #include "../myshell.h"
+#include "../commands.h" // https://stackoverflow.com/questions/21260735/how-to-invoke-function-from-external-c-file-in-c
+#include "../utility.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -46,7 +48,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "../commands.h" // https://stackoverflow.com/questions/21260735/how-to-invoke-function-from-external-c-file-in-c
+
 
 extern char **environ;  // NULL terminated array of char *
 char *getenv(const char *name);
@@ -69,30 +71,22 @@ int main (int argc, char ** argv)
     char * args[MAX_ARGS];                     // pointers to arg strings
     char ** arg;                               // working pointer thru args
     char batchfile[MAX_BUFFER];
-    char batchfile_content[MAX_BUFFER];
     //char * prompt = strcat(getenv("PWD")," --> ");                    // shell prompt
     //setenv("SHELL", strcat(getenv("PWD"), "/myshell"), 1);
 
 /* keep reading input until "quit" command or eof of redirected input */
+    
+    
 
     while (!feof(stdin)) {
 
 /* get command line from input */
         if(argv[1]) {
             strcpy(batchfile, argv[1]);
-            //printf("%s\n", batchfile);
-            FILE *pfile = NULL;
-            pfile = fopen(batchfile, "r");
-            if (pfile == NULL) {
-                printf("Error opening file, pleas try again.\n");
-                return -1;
-            } // https://stackoverflow.com/questions/25823332/c-programming-read-file-and-store-it-as-a-string
-            while (fgets(batchfile_content, sizeof(batchfile_content), pfile) != NULL) { }
-            system(batchfile_content);
-            fclose(pfile);
-            exit(0);
+            batchmode(batchfile);
         }
         
+        welcome();
         printf("%s --> ", getenv("PWD"));                // write prompt
         //if (fgets(input, MAX_BUFFER, stdin) == NULL) continue;
         if (fgets (input, MAX_BUFFER, stdin )) { // read a line
