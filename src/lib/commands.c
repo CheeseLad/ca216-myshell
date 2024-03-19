@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <errno.h>
+#include <sys/wait.h>
 
 extern char **environ;
 
@@ -82,6 +84,7 @@ int command(char * args[MAX_ARGS]) {
                             //strcat(newcd, system("pwd"));
                             //printf("%s", newcd);
                             putenv(newcd);
+                            //setenv(newcd);
                         }
                          
 
@@ -107,7 +110,6 @@ int command(char * args[MAX_ARGS]) {
                 }
 
                 else if (!strcmp(args[0],"echo")) { // "dir" command
-                    int echo_count = 0;
                     for (int i = 1; args[i] != NULL; i++) {
                         printf("%s ", args[i]);
                     }

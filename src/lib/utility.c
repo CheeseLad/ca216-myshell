@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+
 int batchmode(char batchfile[MAX_BUFFER]) {
   char batchfile_content[MAX_BUFFER];
   FILE *pfile = NULL;
@@ -25,3 +32,48 @@ void welcome() {
   printf("|                                                                                    |\n");
   printf("______________________________________________________________________________________\n");
 }
+
+int fork_exec(char **args) {
+  pid_t pid = fork();
+
+	            if (pid < 0) {
+		            fprintf(stderr, "Fork Failed\n");
+		            return 1;
+	            }
+	            else if (pid == 0) {
+		            int status = command(args);
+                    if (status == 0) {
+                        int execvp_status_code = execvp(args[0], args);
+                        if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                            printf("Terminated Incorrectly\n");
+                            return 1;
+                        }
+                    }
+	            } else {
+                wait(&pid); // Wait for the child
+                //printf("Child  code is");
+                return 0;
+              }
+                                      //waitpid(pid, NULL, 0);
+                        //printf("Resuming main()...");
+              
+  }
+
+int background_execute(char **args) {
+  pid_t pid = fork();
+
+	            if (pid < 0) {
+		            fprintf(stderr, "Fork Failed\n");
+		            return 1;
+	            }
+	            else if (pid == 0) {
+		            int status = command(args);
+                    if (status == 0) {
+                        int execvp_status_code = execvp(args[0], args);
+                        if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                            printf("Terminated Incorrectly\n");
+                            return 1;
+                        }
+                    }
+	            } 
+  }
