@@ -41,14 +41,14 @@ int fork_exec(char **args) {
 		            return 1;
 	            }
 	            else if (pid == 0) {
-		            int status = command(args);
-                    if (status == 0) {
+		            //int status = command(args);
+                    //if (status == 0) {
                         int execvp_status_code = execvp(args[0], args);
                         if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
                             printf("Terminated Incorrectly\n");
                             return 1;
                         }
-                    }
+                    //}
 	            } else {
                 wait(&pid); // Wait for the child
                 //printf("Child  code is");

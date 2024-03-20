@@ -31,8 +31,14 @@ int command(char * args[MAX_ARGS]) {
                     //system("ls -al");
                     // https://stackoverflow.com/questions/12489/how-do-you-get-a-directory-listing-in-c
                     DIR *dp;
-                    struct dirent *ep;     
-                    dp = opendir ("./");
+                    struct dirent *ep;
+                    if (!strcmp(args[1],"&")) {
+                        dp = opendir ("./");
+                    }
+                    else {
+                        dp = opendir ("./");
+                     }
+                    
                     if (dp != NULL) {
                         while ((ep = readdir (dp)) != NULL)
                             //printf("%s", ep);

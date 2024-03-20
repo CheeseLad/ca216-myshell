@@ -125,6 +125,7 @@ int main (int argc, char ** argv)
                     stdout_arg_file = i + 1;
                 }
                 if(!strcmp(args[i], ">>")) {
+                    redirection_stdout = 1;
                     redirection_create_append = 1;
                     stdout_arg_file = i + 1;
                 }
@@ -171,7 +172,12 @@ int main (int argc, char ** argv)
                     FILE *stdin_pointer;
                     FILE *stdout_pointer;
                     stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
-                    stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+                    if (redirection_create_append == 0) {
+                        stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+                    } else {
+                        stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
+                    }
+                    
                     int status = command(args);
                     fclose(stdin_pointer);
                     fclose(stdout_pointer);
