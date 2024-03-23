@@ -15,16 +15,57 @@ I acknowledge the DCU Academic Integrity Policy in this submitted work
 
 extern char **environ;
 
-int command_clear() {
-    printf("\033[H"); // https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
+int command_clear() { // https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
+    printf("\033[H"); 
     printf("\033[2J");
     return 1;
 }
 
-int command_pause() {
+int command_pause() { // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
     printf("-----------------------------------------------------");
-    printf("\nMyShell is paused, press the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
+    printf("\nMyShell is paused, press the ENTER key to continue... ");  
     getchar();  
+    return 1;
+}
+
+int command_environ() {
+    for (int i = 0; environ[i] != NULL; i++) { // loops through each environment variable and prints it out
+        printf("%s\n",environ[i]);
+    }              
+    return 1;
+}
+
+int command_quit() { // clean exit upon quit
+    printf("----------------------");
+    printf("\nMyShell is quitting...\n");
+    exit(0);   
+}
+
+int command_echo(char * args[MAX_ARGS]) {
+    for (int i = 1; args[i] != NULL; i++) {
+        if (!strcmp(args[i],">")) {
+            break;
+        }
+        else {
+            printf("%s ", args[i]);
+        }
+    }
+    printf("\n");
+    return 1;
+}
+
+int command_help() {
+    FILE *pfile_help = NULL;
+    pfile_help = fopen("./manual/readme", "r");
+    int c;
+    if (pfile_help) { // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
+        while ((c = getc(pfile_help)) != EOF)
+            putchar(c);
+        fclose(pfile_help);
+    }
+    printf("\n----------------------------------");
+    printf("\nPress the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
+    getchar();   
     return 1;
 }
 
@@ -122,49 +163,24 @@ DIR *dp;
                     return 1;
                 }
 
-                else if (!strcmp(args[0],"environ")) { // "environ" command
-                    for (int i = 0; environ[i] != NULL; i++)
-                        printf("%s\n",environ[i]);
-                    return 1;
+                else if (!strcmp(args[0], "help")) { // "help" command
+                    return command_help();
                 }
 
-                else if (!strcmp(args[0],"echo")) { // "dir" command
-                    for (int i = 1; args[i] != NULL; i++) {
-                        if (!strcmp(args[i],">")) {
-                            break;
-                        }
-                        else {
-                            printf("%s ", args[i]);
-                        }
-                    }
-                    printf("\n");
-                    return 1;
-                }
-
-                else if (!strcmp(args[0], "help")) {
-                    FILE *pfile_help = NULL;
-                    pfile_help = fopen("./manual/readme", "r");
-                    int c;
-                    if (pfile_help) { // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
-                        while ((c = getc(pfile_help)) != EOF)
-                            putchar(c);
-                        fclose(pfile_help);
-                        }
-                    printf("\n----------------------------------");
-                    printf("\nPress the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
-                    getchar();   
-                    return 1;
-                }
-
-                
-                else if (!strcmp(args[0], "pause")) {
+                else if (!strcmp(args[0], "pause")) { // "pause" command
                     return command_pause();
                 }
 
-                else if (!strcmp(args[0],"quit")|| !strcmp(args[0],"q")) {  // "quit" command
-                    printf("----------------------");
-                    printf("\nMyShell is quitting...\n");
-                    exit(0);                    // break out of 'while' loop
+                else if (!strcmp(args[0],"environ")) { // "environ" command
+                    return command_environ();
+                }
+
+                else if (!strcmp(args[0],"quit")) {  // "quit" command
+                    return command_quit(); 
+                }
+
+                else if (!strcmp(args[0],"echo")) { // "echo" command
+                    return command_echo(args);
                 }
 
                 else {

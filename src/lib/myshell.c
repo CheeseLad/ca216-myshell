@@ -42,13 +42,13 @@ int main (int argc, char ** argv)
     while (!feof(stdin)) {
 
 /* get command line from input */
-        if(argv[1]) {
+        if(argv[1]) { // if file provided in the arguments, run it in batchmode
             strcpy(batchfile, argv[1]);
             batchmode(batchfile);
         }
         
         
-        printf("%s - %s --> ", getenv("PWD"), getenv("USER"));  
+        printf("%s - %s --> ", getenv("PWD"), getenv("USER"));  // creates the prompt with the current working directory and user
         if (fgets (input, MAX_BUFFER, stdin )) { // read a line
 
 /* tokenize the input into args array */
@@ -91,66 +91,60 @@ int main (int argc, char ** argv)
             if (args[0] && background_execution == 1) {
                 background_execute(args);
             }
-
-            if (args[0] && background_execution == 0) {                     // if there's anything there
-                if (redirection_stdout == 0 && redirection_stdin == 0) {
-                    int status = command(args);
-                    if (status == 0) {
-                        fork_exec(args, result);
+            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 0) {                     // if there's anything there
+                int status = command(args);
+                if (status == 0) {
+                    fork_exec(args, result);
+                }
+            } 
+            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 0) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
+                FILE *stdout_pointer;
+                stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+                int status = command(args);
+                if (status == 0) {
+                    int execvp_status_code = execvp(args[0], args);
+                    if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                        printf("Terminated Incorrectly\n");
+                        return 1;
                     }
-                } 
-                else if (redirection_stdout == 1 && redirection_stdin == 0) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                    FILE *stdout_pointer;
-                    stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
-                    int status = command(args);
-                    if (status == 0) {
-
-                        int execvp_status_code = execvp(args[0], args);
-                        if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
-                            printf("Terminated Incorrectly\n");
-                            return 1;
-                        }
                         //system(input_before);
                         
                         //execlp(args[0], input_before);
                     }
                     fclose(stdout_pointer);
-                    break;
+            }
+            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
+                FILE *stdin_pointer;
+                FILE *stdout_pointer;
+                stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
+                if (redirection_create_append == 0) {
+                    stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+                } else {
+                    stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
+                }
                     
-                } else if (redirection_stdout == 1 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                    FILE *stdin_pointer;
-                    FILE *stdout_pointer;
-                    stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
-                    if (redirection_create_append == 0) {
-                        stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
-                    } else {
-                        stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
-                    }
-                    
-                    int status = command(args);
-                    fclose(stdin_pointer);
-                    fclose(stdout_pointer);
-                    if (status == 0) {
-                        system(input_before);
+                int status = command(args);
+                if (status == 0) {
+                    system(input_before);
                         //fclose(stdout_pointer);
                         //execlp(args[0], input_before);
                     }
-                }
-                else if (redirection_stdout == 0 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                    FILE *stdin_pointer;
-                    stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
+                fclose(stdin_pointer);
+                fclose(stdout_pointer);
+            }
+            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
+                FILE *stdin_pointer;
+                stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
                     
-                    int status = command(args);
-                    if (status == 0) {
-                        system(input_before);
+                int status = command(args);
+                if (status == 0) {
+                    system(input_before);
                         //fclose(stdout_pointer);
                         //execlp(args[0], input_before);
-                    }
-                    fclose(stdin_pointer);
-                    continue;
                 }
-            }                
+                fclose(stdin_pointer);
+                break;
+            }              
         }
     }
-    return 0; 
 }
