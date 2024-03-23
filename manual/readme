@@ -7,6 +7,7 @@ MyShell is a fully-featured shell written in C that can execute commands, redire
 
 List of built-in commands:
     - cd: Change directory
+    - 
     - clr: Clear the screen
     - dir: List the contents of the current directory
     - environ: List all environment variables
@@ -18,6 +19,9 @@ List of built-in commands:
     Description of environment concepts (10 marks)
 
 Upon starting up MyShell, a new enviroment variable called `SHELL` is created and set to the path where the shell executable is located.
+The command `environ` can be used to list all of the environment variables currently set on the system.
+When executing a non-built-in command, an environment variable called `PARENT` is created and links to where the shell executable is stored.
+
 
     Description of i/o redirection (10 marks)
 
@@ -25,9 +29,18 @@ Upon starting up MyShell, a new enviroment variable called `SHELL` is created an
 
     - `>`: Redirects the output of a command to a file, overwriting the file if it already exists
     - `>>`: Redirects the output of a command to a file, appending to the file if it already exists
+    - 
     Description of the process concept, and the differences between background and foreground execution (5 marks)
+
     Overall layout and display of understanding (10 marks)
+
     Inclusion of four references from peer-reviewed sources such as books, articles etc. (5 marks). Note that the inclusion of Wikipedia, or a random website which just happened to come up in a Google search will result in a grade of 0 for this aspect.
+
+    [1] B. Fox and C. Ramey, “Bash(1): GNU bourne-again shell - linux man page,” bash(1): GNU Bourne-Again SHell - Linux man page, https://linux.die.net/man/1/bash (accessed Mar. 23, 2024). 
+    
+    [2]
+    [3]
+    [4]
 
 
 

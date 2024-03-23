@@ -32,17 +32,26 @@ int command(char * args[MAX_ARGS]) {
     if (!strcmp(args[0],"clear") || !strcmp(args[0],"clr")) { // "clear"/"clr" command
         return command_clear();
     } else if (!strcmp(args[0],"dir") || !strcmp(args[0],"ls")) { // "dir" command
+                        for (int i = 1; args[i] != NULL; i++) {
+                        printf("%d", i);
+                    }
+DIR *dp;
+  struct dirent *ep;     
+  dp = opendir ("./");
+  if (dp != NULL)
+  {
+    while ((ep = readdir (dp)) != NULL)
+      puts (ep->d_name);
+          
+    (void) closedir (dp);
+    return 0;
+  }
+
                     //system("ls -al");
                     // https://stackoverflow.com/questions/12489/how-do-you-get-a-directory-listing-in-c
-                    DIR *dp;
+                    /* DIR *dp;
                     struct dirent *ep;
-                    if (!strcmp(args[1],"&")) {
-                        dp = opendir ("./");
-                    }
-                    else {
-                        dp = opendir ("./");
-                     }
-                    
+                    dp = opendir ("./");
                     if (dp != NULL) {
                         while ((ep = readdir (dp)) != NULL)
                             //printf("%s", ep);
@@ -53,7 +62,7 @@ int command(char * args[MAX_ARGS]) {
                     else {
                         perror ("Couldn't open the directory");
                         return -1;
-                    }
+                    } */
                 }
 
                 else if (!strcmp(args[0],"cd")) { // "dir" command
@@ -121,20 +130,25 @@ int command(char * args[MAX_ARGS]) {
 
                 else if (!strcmp(args[0],"echo")) { // "dir" command
                     for (int i = 1; args[i] != NULL; i++) {
-                        printf("%s ", args[i]);
+                        if (!strcmp(args[i],">")) {
+                            break;
+                        }
+                        else {
+                            printf("%s ", args[i]);
+                        }
                     }
                     printf("\n");
                     return 1;
                 }
 
                 else if (!strcmp(args[0], "help")) {
-                    FILE *pfile = NULL;
-                    pfile = fopen("./manual/readme", "r");
+                    FILE *pfile_help = NULL;
+                    pfile_help = fopen("./manual/readme", "r");
                     int c;
-                    if (pfile) { // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
-                        while ((c = getc(pfile)) != EOF)
+                    if (pfile_help) { // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
+                        while ((c = getc(pfile_help)) != EOF)
                             putchar(c);
-                        fclose(pfile);
+                        fclose(pfile_help);
                         }
                     printf("\n----------------------------------");
                     printf("\nPress the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
@@ -156,4 +170,5 @@ int command(char * args[MAX_ARGS]) {
                 else {
                     return 0;
                 }
+        return 0;
 }

@@ -9,5 +9,5 @@ I acknowledge the DCU Academic Integrity Policy in this submitted work
 
 int batchmode(char batchfile[MAX_BUFFER]);
 void welcome();
-int fork_exec(char **args);
+int fork_exec(char **args, char result[MAX_BUFFER]);
 int background_execute(char **args);
