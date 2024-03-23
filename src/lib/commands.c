@@ -69,45 +69,21 @@ int command_help() {
     return 1;
 }
 
-int command(char * args[MAX_ARGS]) {
-    if (!strcmp(args[0],"clear") || !strcmp(args[0],"clr")) { // "clear"/"clr" command
-        return command_clear();
-    } else if (!strcmp(args[0],"dir") || !strcmp(args[0],"ls")) { // "dir" command
-                        for (int i = 1; args[i] != NULL; i++) {
-                        printf("%d", i);
-                    }
-DIR *dp;
-  struct dirent *ep;     
-  dp = opendir ("./");
-  if (dp != NULL)
-  {
-    while ((ep = readdir (dp)) != NULL)
-      puts (ep->d_name);
+int command_dir() {
+    DIR *dp;
+    struct dirent *ep;     
+    dp = opendir ("./");
+    if (dp != NULL) {
+        while ((ep = readdir (dp)) != NULL) { }
           
     (void) closedir (dp);
-    return 0;
+    
   }
+  return 0;
+}
 
-                    //system("ls -al");
-                    // https://stackoverflow.com/questions/12489/how-do-you-get-a-directory-listing-in-c
-                    /* DIR *dp;
-                    struct dirent *ep;
-                    dp = opendir ("./");
-                    if (dp != NULL) {
-                        while ((ep = readdir (dp)) != NULL)
-                            //printf("%s", ep);
-          
-                        closedir(dp);
-                        return 0;
-                    }
-                    else {
-                        perror ("Couldn't open the directory");
-                        return -1;
-                    } */
-                }
-
-                else if (!strcmp(args[0],"cd")) { // "dir" command
-                    if (args[1] == NULL) {
+int command_cd(char * args[MAX_ARGS]) {
+    if (args[1] == NULL) {
                         // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
                         FILE *dir_file_blank;
                         char blank_pwd[MAX_BUFFER];
@@ -137,54 +113,49 @@ DIR *dp;
   }
 
   while (fgets(new_pwd, sizeof(new_pwd), dir_file_pointer) != NULL) {
-      //printf("%s", new_pwd);
       strcat(newcd, new_pwd);
   }
-
-                            //strcat(newcd, system("pwd"));
-                            //printf("%s", newcd);
                             putenv(newcd);
-                            //setenv(newcd);
                         }
-                         
-
-                        //if (!strcmp(args[1],"..")) {
-                            //system("cd ..");
-                            //chdir("..");
-                            //system("pwd");
-                            //printf("YES");
-                            //printf("%s", chdir(".."));
-                        //}
                     }
-                    //chdir();
-                    //char test = getcwd();
-                    //printf("%s", getenv("PWD"));
-                    //setenv();
                     return 1;
-                }
+                
+}
 
-                else if (!strcmp(args[0], "help")) { // "help" command
-                    return command_help();
-                }
+int command(char * args[MAX_ARGS]) {
+    if (!strcmp(args[0],"cd")) { // "cd" command
+        return command_cd(args);
+    }
 
-                else if (!strcmp(args[0], "pause")) { // "pause" command
-                    return command_pause();
-                }
+    else if (!strcmp(args[0],"clr")) { // "clr" command
+        return command_clear();
+    }
 
-                else if (!strcmp(args[0],"environ")) { // "environ" command
-                    return command_environ();
-                }
+    else if (!strcmp(args[0],"dir")) { // "dir" command
+        return command_dir();
+    }
 
-                else if (!strcmp(args[0],"quit")) {  // "quit" command
-                    return command_quit(); 
-                }
+    else if (!strcmp(args[0], "help")) { // "help" command
+        return command_help();
+    }
 
-                else if (!strcmp(args[0],"echo")) { // "echo" command
-                    return command_echo(args);
-                }
+    else if (!strcmp(args[0], "pause")) { // "pause" command
+        return command_pause();
+    }
 
-                else {
-                    return 0;
-                }
+    else if (!strcmp(args[0],"environ")) { // "environ" command
+        return command_environ();
+    }
+
+    else if (!strcmp(args[0],"quit")) {  // "quit" command
+        return command_quit(); 
+    }
+
+    else if (!strcmp(args[0],"echo")) { // "echo" command
+        return command_echo(args);
+    }
+
+    else {
         return 0;
+    }
 }
