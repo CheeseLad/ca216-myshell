@@ -16,8 +16,6 @@ I acknowledge the DCU Academic Integrity Policy in this submitted work
 #include <sys/types.h>
 #include <sys/wait.h>
 
-
-
 extern char **environ;  // NULL terminated array of char *
 char *getenv(const char *name);
 
@@ -31,8 +29,8 @@ int main (int argc, char **argv)
     char *args[MAX_ARGS];                     // pointers to arg strings
     char **arg;                               // working pointer thru args
     char batchfile[MAX_BUFFER];
-    char *args2[MAX_ARGS];                     // pointers to arg strings
-    char **arg2;                               // working pointer thru args
+    char *args_cleaned[MAX_ARGS];                     // pointers to arg strings
+    char **arg_cleaned;                               // working pointer thru args
     
 
     char result[MAX_BUFFER]; // https://stackoverflow.com/questions/143174/how-do-i-get-the-directory-that-a-program-is-running-from
@@ -44,24 +42,20 @@ int main (int argc, char **argv)
         welcome();
     }
     while (!feof(stdin)) {
-
-/* get command line from input */
+        /* get command line from input */
         if(argv[1]) { // if file provided in the arguments, run it in batchmode
             strcpy(batchfile, argv[1]);
             batchmode(batchfile);
         }
-        
-                        char arg_filter[MAX_BUFFER] = "";
+        char arg_filter[MAX_BUFFER] = "";
         printf("%s - %s --> ", getenv("PWD"), getenv("USER"));  // creates the prompt with the current working directory and user
         if (fgets (input, MAX_BUFFER, stdin )) { // read a line
-
-/* tokenize the input into args array */
-            
+            /* tokenize the input into args array */
             arg = args;
             strcpy(input_before, input);
-            *arg++ = strtok(input,SEPARATORS);   // tokenize input
-            while ((*arg++ = strtok(NULL,SEPARATORS)));
-                                               // last entry will be NULL 
+            *arg++ = strtok(input,SEPARATORS);  // tokenize input
+            while ((*arg++ = strtok(NULL,SEPARATORS))); // last entry will be NULL 
+
             // switches to determine what the user requests to do
             int background_execution = 0;
             int redirection_stdin = 0;
@@ -72,7 +66,7 @@ int main (int argc, char **argv)
             int stop = 0;
 
             int arg_count = 0;
-            for (int i = 0; args[i] != NULL; i++) {
+            for (int i = 0; args[i] != NULL; i++) { // loop through the args to find redirection symbols
                 if(!strcmp(args[i], "<") && args[i + 1]) {
                     redirection_stdin = 1;
                     stdin_arg_file = i + 1;
@@ -90,21 +84,19 @@ int main (int argc, char **argv)
                     stop = 1;
                 }
                 if (stop == 0) {
-                    arg_count++;
+                    arg_count++; // count the number of arguments before redirection symbols are found
                 }
             }
             for (int i = 0; i < arg_count; i++) {
                 strcat(arg_filter, args[i]);
-                //printf("Arg filter: %s\n", arg_filter);
             }
-            //printf("Result: %s\n", arg_filter);
-            arg2 = args2;
-            *arg2++ = strtok(arg_filter,SEPARATORS);   // tokenize input
-            while ((*arg2++ = strtok(NULL,SEPARATORS)));
+            arg_cleaned = args_cleaned;
+            *arg_cleaned++ = strtok(arg_filter,SEPARATORS); // tokenize the filtered args
+            while ((*arg_cleaned++ = strtok(NULL,SEPARATORS))); // last entry will be NULL
 
 
             if (arg_count > 1) {
-                if (!strcmp(args[arg_count - 1],"&")) {
+                if (!strcmp(args[arg_count - 1],"&")) { // if the last argument is &, the user wants to run the command in the background
                     background_execution = 1;
                 } 
             }
@@ -113,44 +105,19 @@ int main (int argc, char **argv)
             }
             if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 0) {
                 int status = command(args);
-                if (status == 0) {
+                if (status == 0) { // if the command is not an internal command, fork and execute
                     fork_exec(args, result);
                 }
             } 
-            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 0) { 
-                process_stdout(args, redirection_create_append, stdout_arg_file, args2);
+            // execute a different function depending on the user's redirection request
+            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 0) {
+                process_stdout(args, redirection_create_append, stdout_arg_file, args_cleaned);
             }
-            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                process_stdin(args, stdin_arg_file, args2);
+            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 1) {
+                process_stdin(args, stdin_arg_file, args_cleaned);
             }    
-            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                FILE *stdin_pointer;
-                FILE *stdout_pointer;
-                stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
-                if (stdin_pointer == NULL) {
-                    printf("Input file was not found.\n");
-                    break;
-                }
-                if (redirection_create_append == 0) {
-                    stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
-                    if (stdout_pointer == NULL) {
-                        printf("Output file was not found.\n");
-                        break;
-                    }
-                } else {
-                    stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
-                    if (stdout_pointer == NULL) {
-                        printf("Output file was not found.\n");
-                        break;
-                    }
-                }
-                    
-                int status = command(args2);
-                if (status == 0) {
-                    execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
-                }
-                fclose(stdin_pointer);
-                fclose(stdout_pointer);
+            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 1) {
+                process_stdin_stdout(args, redirection_create_append, stdout_arg_file, stdin_arg_file, args_cleaned);
             }          
         }
     }

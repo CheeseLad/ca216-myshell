@@ -196,7 +196,7 @@ void process_stdout(char **args, int redirection_create_append, int stdout_arg_f
  
 }
 
-void process_stdin(char **args, int stdin_arg_file, char **args2) {
+void process_stdin(char **args, int stdin_arg_file, char **args2) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
   pid_t pid = fork();
 
               if (pid < 0) {
@@ -218,4 +218,31 @@ void process_stdin(char **args, int stdin_arg_file, char **args2) {
                 }
                 fclose(stdin_pointer);
               } 
+}
+
+void process_stdin_stdout(char **args, int redirection_create_append, int stdin_arg_file, int stdout_arg_file, char **args2) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
+FILE *stdin_pointer;
+                FILE *stdout_pointer;
+                stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
+                if (stdin_pointer == NULL) {
+                    printf("Input file was not found.\n");
+                }
+                if (redirection_create_append == 0) {
+                    stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+                    if (stdout_pointer == NULL) {
+                        printf("Output file was not found.\n");
+                    }
+                } else {
+                    stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
+                    if (stdout_pointer == NULL) {
+                        printf("Output file was not found.\n");
+                    }
+                }
+                    
+                int status = command(args2);
+                if (status == 0) {
+                    execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                }
+                fclose(stdin_pointer);
+                fclose(stdout_pointer);
 }

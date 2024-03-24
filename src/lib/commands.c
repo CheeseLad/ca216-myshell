@@ -169,6 +169,6 @@ int command(char * args[MAX_ARGS]) {
     }
 
     else {
-        return 0;
+        return 0; // internal commands will return 1, external commands will return 0 and will be forked and executed
     }
 }
