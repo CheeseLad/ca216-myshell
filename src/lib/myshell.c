@@ -3,16 +3,17 @@ Name: Jake Farrell
 Student Number: 22349856
 I acknowledge the DCU Academic Integrity Policy in this submitted work
 */
+
 #include "../myshell.h"
 #include "../commands.h" // https://stackoverflow.com/questions/21260735/how-to-invoke-function-from-external-c-file-in-c
 #include "../utility.h"
 
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 

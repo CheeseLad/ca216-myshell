@@ -3,14 +3,16 @@ Name: Jake Farrell
 Student Number: 22349856
 I acknowledge the DCU Academic Integrity Policy in this submitted work
 */
+
 #include "../myshell.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
 #include <errno.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 
 extern char **environ;
@@ -69,70 +71,69 @@ int command_help() {
     return 1;
 }
 
-int command_dir(char * args[MAX_ARGS]) {
+int command_dir(char * args[MAX_ARGS]) { // https://stackoverflow.com/questions/12489/how-do-you-get-a-directory-listing-in-c
     DIR *dp;
     struct dirent *ep;
     if (args[1] != NULL) {
         dp = opendir(args[1]);
-    } else {     
-    dp = opendir ("./");
+    } 
+    else {     
+        dp = opendir ("./");
     }
     if (dp != NULL) {
         while ((ep = readdir (dp)) != NULL) { 
             printf("%s\n", ep->d_name);
         }
-          
-    (void) closedir (dp);
-    
-  }
-  return 1;
+    } 
+    else {
+        printf("Directory `%s` not found.\n", args[1]);
+        return 1;
+    }      
+    closedir(dp);
+    return 1;
 }
 
 int command_cd(char * args[MAX_ARGS]) {
     if (args[1] == NULL) {
         // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
         FILE *dir_file_blank;
-        char blank_pwd[MAX_BUFFER];
+        char blank_pwd[MAX_BUFFER] = "";
         dir_file_blank = popen("pwd", "r");
         if (dir_file_blank == NULL) {
             printf("Failed to run command\n" );
             return 1;
         }
 
-        while (fgets(blank_pwd, sizeof(blank_pwd), dir_file_blank) != NULL) {
+        while (fgets(blank_pwd, sizeof(blank_pwd), dir_file_blank) != NULL) { // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
             printf("%s", blank_pwd);
         }
-    } else if (args[1]) {
+    } 
+    else if (args[1]) {
         int dir_status = chdir(args[1]);
         if(dir_status == -1) {
             printf("Directory not found.\n");
+            return 1;
         }
         if (dir_status == 0) {
-            char newcd[MAX_BUFFER];
-            //strcpy(newcd, "PWD="); // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
+            char newcd[MAX_BUFFER] = "";
             FILE *dir_file_pointer;
-            char new_pwd[MAX_BUFFER];
+            char new_pwd[MAX_BUFFER]= "";
             dir_file_pointer = popen("pwd", "r");
             if (dir_file_pointer == NULL) {
                 printf("Failed to run command\n");
                 return 1;
-                
             }
-
             while (fgets(new_pwd, sizeof(new_pwd), dir_file_pointer) != NULL) {
                 strcat(newcd, new_pwd);
             }
-            //putenv(newcd);
             int size = strlen(newcd);
             if (newcd[size - 1] == '\n') {
                 newcd[size - 1] = '\0';
             }
-                
-                setenv("PWD", newcd, 1);
-            }
-                    }
-                    return 1;
-                
+            setenv("PWD", newcd, 1);
+        }
+    }
+    return 1;         
 }
 
 int command(char * args[MAX_ARGS]) {

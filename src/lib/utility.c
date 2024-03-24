@@ -3,19 +3,19 @@ Name: Jake Farrell
 Student Number: 22349856
 I acknowledge the DCU Academic Integrity Policy in this submitted work
 */
+
 #include "../myshell.h"
 #include "../utility.h"
 #include "../commands.h" // https://stackoverflow.com/questions/21260735/how-to-invoke-function-from-external-c-file-in-c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
 #include <errno.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <sys/wait.h>
-
-#include <signal.h>
 
 void batchmode(char batchfile[MAX_BUFFER]) {
   FILE* pBatchfile;
@@ -59,24 +59,21 @@ void welcome() {
   printf("______________________________________________________________________________________\n");
 }
 
-int fork_exec(char **args, char result[MAX_BUFFER]) {
+void fork_exec(char **args, char result[MAX_BUFFER]) {
   pid_t pid = fork(); // create a child process
   if (pid < 0) {
 		fprintf(stderr, "Fork Failed\n");
-		return 1;
 	}
 	else if (pid == 0) {
 		setenv("PARENT", result, 1); // set the parent environment variable as described in the assignment
     int execvp_status_code = execvp(args[0], args);
     if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
       printf("External command did not run successfully, maybe `%s` was a typo?\n", args[0]);
-      return 1;
+      exit(EXIT_FAILURE);
     }
-    return 1;
 	} 
   else {
     wait(&pid); // Wait for the child to finish before resuming the parent
-    return 0;
   }      
 }
 
