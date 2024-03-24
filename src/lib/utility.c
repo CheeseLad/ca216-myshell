@@ -85,7 +85,7 @@ int background_execute(char **args) {
 		return 1;
 	}
 	else if (pid == 0) {
-		int status = command(args);
+		int status = command(args); // check if the command is an internal command, if not, run it as external
     if (status == 0) {
       int execvp_status_code = execvp(args[0], args);
       if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
@@ -99,25 +99,25 @@ int background_execute(char **args) {
 }
 
 void process_stdout(char **args, int redirection_create_append, int stdout_arg_file, char **args2) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-  int toggle = 0;
-  pid_t pid = fork();
+  int toggle = 0; // will be used to see if need to wait for child process
+  pid_t pid = fork(); // try to create fork, print error if fork unsuccessful
 	if (pid < 0) {
     fprintf(stderr, "Fork Failed\n");
 	}
 	else if (pid == 0) {
 		FILE *stdout_pointer;
     if (redirection_create_append == 0) {
-      stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+      stdout_pointer = freopen(args[stdout_arg_file], "w", stdout); // open the file provided to write to it
     }
     else {
-      stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
+      stdout_pointer = freopen(args[stdout_arg_file], "a", stdout); // open the file provided to append to it
     }
     if (stdout_pointer == NULL) { // https://stackoverflow.com/questions/14680232/how-to-detect-a-file-is-opened-or-not-in-c
       printf("Output file was not found.\n");
       toggle = 1;
       exit(EXIT_FAILURE);
     }
-    int status = command(args2);
+    int status = command(args2); // args2 is the args without the redirection symbols, where as args is the full args array
     if (status == 0) {
       toggle = 1;
       int execvp_status_code = execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
@@ -126,7 +126,7 @@ void process_stdout(char **args, int redirection_create_append, int stdout_arg_f
         exit(EXIT_FAILURE);
       }
     }
-    fclose(stdout_pointer);
+    fclose(stdout_pointer); // close the file
 	} 
   else {
     if (toggle == 1) {
@@ -142,7 +142,7 @@ void process_stdin(char **args, int stdin_arg_file, char **args2) { // https://w
   }
   else if (pid == 0) {
     FILE *stdin_pointer;
-    stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
+    stdin_pointer = freopen(args[stdin_arg_file], "r", stdin); // open the file and use the contents to replace stdin
     if (stdin_pointer == NULL) {
       printf("Input file was not found, please check that `%s` was the correct file name.\n", args[stdin_arg_file]);
       exit(EXIT_FAILURE);
@@ -163,29 +163,29 @@ void process_stdin(char **args, int stdin_arg_file, char **args2) { // https://w
 }
 
 void process_stdin_stdout(char **args, int redirection_create_append, int stdin_arg_file, int stdout_arg_file, char **args2) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-  pid_t pid = fork();
+  pid_t pid = fork(); // try to create fork, print error if fork unsuccessful
   if (pid < 0) {
     fprintf(stderr, "Fork Failed\n");
   }
   else if (pid == 0) {
-    FILE *stdin_pointer;
+    FILE *stdin_pointer; // create pointers to store the file data
     FILE *stdout_pointer;
-    stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
+    stdin_pointer = freopen(args[stdin_arg_file], "r", stdin); // open the file and use the contents to replace stdin
     if (stdin_pointer == NULL) {
       printf("Input file was not found.\n");
       exit(EXIT_FAILURE);
     }
     if (redirection_create_append == 0) {
-      stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+      stdout_pointer = freopen(args[stdout_arg_file], "w", stdout); // open the file provided to write to it
     }
     else {
-      stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
+      stdout_pointer = freopen(args[stdout_arg_file], "a", stdout); // open the file provided to append to it
     }
     if (stdout_pointer == NULL) {
       printf("Output file was not found.\n");
       exit(EXIT_FAILURE);
     }
-    int status = command(args2);
+    int status = command(args2); // args2 is the args without the redirection symbols, where as args is the full args array
     if (status == 0) {
       int execvp_status_code = execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
       if (execvp_status_code == -1) {
@@ -193,7 +193,7 @@ void process_stdin_stdout(char **args, int redirection_create_append, int stdin_
         exit(EXIT_FAILURE);
       }
     }
-    fclose(stdin_pointer);
+    fclose(stdin_pointer); // remember to close the files after using them
     fclose(stdout_pointer);
     } 
   else {
