@@ -18,33 +18,29 @@ I acknowledge the DCU Academic Integrity Policy in this submitted work
 #include <sys/wait.h>
 
 extern char **environ;  // NULL terminated array of char *
-char *getenv(const char *name);
+char *getenv(const char *name); // get's the value of an environment variable
 
 extern int errno;        // system error number 
 void syserr(char* );     // error report and abort routine 
 
 int main (int argc, char **argv)
 {
-    char input[MAX_BUFFER];                      // line buffer
-    char input_before[MAX_BUFFER];
-    char *args[MAX_ARGS];                     // pointers to arg strings
-    char **arg;                               // working pointer thru args
-    char batchfile[MAX_BUFFER];
-    char *args_cleaned[MAX_ARGS];                     // pointers to arg strings
-    char **arg_cleaned;                               // working pointer thru args
-    
+    char input[MAX_BUFFER];         // line buffer
+    char *args[MAX_ARGS];           // pointers to arg strings
+    char **arg;                     // working pointer thru args
+    char batchfile[MAX_BUFFER];     // batchfile buffer
+    char *args_cleaned[MAX_ARGS];   // pointers to arg strings without redirection symbols
+    char **arg_cleaned;             // working pointer thru args without redirection symbols
+    char result[MAX_BUFFER];        // buffer for the result of getcwd
+    char cwd[MAX_BUFFER];           // buffer for the current working directory
 
-    char result[MAX_BUFFER]; // https://stackoverflow.com/questions/143174/how-do-i-get-the-directory-that-a-program-is-running-from
-    //readlink("/proc/self/exe", result, MAX_BUFFER);
-    //strcat(result, getenv("PWD"));
-    char cwd[MAX_BUFFER]; // https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    if (getcwd(cwd, sizeof(cwd)) == NULL) { // https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
         printf("Error getting the current working directory.\n");
         exit(EXIT_FAILURE);
     }
     strcpy(result, cwd);
-    strcat(result, "/myshell");
-    setenv("SHELL", result, 1);
+    strcat(result, "/myshell"); // get the current working directory and append the name of the shell
+    setenv("SHELL", result, 1); // set the SHELL environment variable
     
     if (!argv[1]) { // if no args given (not batchmode), display welcome message to user
         welcome();
@@ -60,7 +56,6 @@ int main (int argc, char **argv)
         if (fgets (input, MAX_BUFFER, stdin )) { // read a line
             /* tokenize the input into args array */
             arg = args;
-            strcpy(input_before, input);
             *arg++ = strtok(input,SEPARATORS);  // tokenize input
             while ((*arg++ = strtok(NULL,SEPARATORS))); // last entry will be NULL 
 
@@ -69,9 +64,9 @@ int main (int argc, char **argv)
             int redirection_stdin = 0;
             int redirection_stdout = 0;
             int redirection_create_append = 0;
-            int stdout_arg_file = 0;
-            int stdin_arg_file = 0;
-            int stop = 0;
+            int stdout_arg_file = 0; // stores the position of the file to redirect stdout to
+            int stdin_arg_file = 0; // stores the position of the file to redirect stdin to
+            int stop = 0; // flag to stop adding arguments to the arg_filter when redirection symbols are found
 
             int arg_count = 0;
             for (int i = 0; args[i] != NULL; i++) { // loop through the args to find redirection symbols

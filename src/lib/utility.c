@@ -34,7 +34,7 @@ void batchmode(char batchfile[MAX_BUFFER]) {
     strcpy(input_before_batchmode, reading);
     reading[strcspn(reading, "\n")] = '\0'; // make newline charcter at the end of a line into a null character // https://stackoverflow.com/questions/9628637/how-can-i-get-rid-of-n-from-string-in-c
 
-    *arg_batchmode++ = strtok(reading,SEPARATORS);   // tokenize input
+    *arg_batchmode++ = strtok(reading,SEPARATORS);   // same process for getting args as in myshell.c
     while ((*arg_batchmode++ = strtok(NULL,SEPARATORS)));
 
     if (args_batchmode[0]) {

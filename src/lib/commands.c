@@ -15,23 +15,25 @@ I acknowledge the DCU Academic Integrity Policy in this submitted work
 #include <sys/types.h>
 #include <sys/wait.h>
 
-extern char **environ;
+extern char **environ; // collection of environment variables
+
+// each internal command will return 1, telling the shell that the internal command has been executed, otherwise the shell will fork and execute the command as external
 
 int command_clear() { // https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
-    printf("\033[H"); 
-    printf("\033[2J");
+    printf("\033[H");  // escape character to move prompt position
+    printf("\033[2J"); // escape character to clear screen
     return 1;
 }
 
 int command_pause() { // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
     printf("-----------------------------------------------------");
     printf("\nMyShell is paused, press the ENTER key to continue... ");  
-    getchar();  
+    getchar(); // waits for user to press enter  
     return 1;
 }
 
 int command_environ() {
-    for (int i = 0; environ[i] != NULL; i++) { // loops through each environment variable and prints it out
+    for (int i = 0; environ[i] != NULL; i++) { // loops through each environment variable and prints them out
         printf("%s\n",environ[i]);
     }              
     return 1;
@@ -40,25 +42,25 @@ int command_environ() {
 int command_quit() { // clean exit upon quit
     printf("----------------------");
     printf("\nMyShell is quitting...\n");
-    exit(0);   
+    exit(EXIT_SUCCESS);
 }
 
 int command_echo(char * args[MAX_ARGS]) {
     for (int i = 1; args[i] != NULL; i++) {
         if (!strcmp(args[i],">")) {
-            break;
+            break; // stops printing if redirection symbol is found (allows echo test > test.txt to work instead of outputting "> test.txt" to the file)
         }
         else {
             printf("%s ", args[i]);
         }
     }
-    printf("\n");
+    printf("\n"); // new line after echo is done
     return 1;
 }
 
 int command_help() {
     FILE *pfile_help = NULL;
-    pfile_help = fopen("./manual/readme", "r");
+    pfile_help = fopen("./manual/readme", "r"); // opening readme file and then printing to screen
     int c;
     if (pfile_help) { // https://stackoverflow.com/questions/3463426/in-c-how-should-i-read-a-text-file-and-print-all-strings
         while ((c = getc(pfile_help)) != EOF)
@@ -72,24 +74,24 @@ int command_help() {
 }
 
 int command_dir(char * args[MAX_ARGS]) { // https://stackoverflow.com/questions/12489/how-do-you-get-a-directory-listing-in-c
-    DIR *dp;
-    struct dirent *ep;
-    if (args[1] != NULL) {
-        dp = opendir(args[1]);
+    DIR *dir_pointer;
+    struct dirent *opened_pointer;
+    if (args[1] != NULL) { // if a directory is provided, open it, otherwise open the current directory
+        dir_pointer = opendir(args[1]);
     } 
     else {     
-        dp = opendir ("./");
+        dir_pointer = opendir (".");
     }
-    if (dp != NULL) {
-        while ((ep = readdir (dp)) != NULL) { 
-            printf("%s\n", ep->d_name);
+    if (dir_pointer != NULL) {
+        while ((opened_pointer = readdir (dir_pointer)) != NULL) {  
+            printf("%s\n", opened_pointer->d_name); // print out each file in the directory
         }
     } 
     else {
-        printf("Directory `%s` not found.\n", args[1]);
+        printf("Directory `%s` not found.\n", args[1]); // if directory not found, print error message
         return 1;
     }      
-    closedir(dp);
+    closedir(dir_pointer); // make sure to close to prevent memory leaks
     return 1;
 }
 
