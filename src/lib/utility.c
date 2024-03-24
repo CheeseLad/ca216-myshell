@@ -71,6 +71,7 @@ void fork_exec(char **args, char result[MAX_BUFFER]) {
       printf("External command did not run successfully, maybe `%s` was a typo?\n", args[0]);
       exit(EXIT_FAILURE);
     }
+    exit(EXIT_SUCCESS);
 	} 
   else {
     wait(&pid); // Wait for the child to finish before resuming the parent
@@ -116,7 +117,7 @@ void process_stdout(char **args, int redirection_create_append, int stdout_arg_f
       toggle = 1;
       exit(EXIT_FAILURE);
     }
-    int status = command(args);
+    int status = command(args2);
     if (status == 0) {
       toggle = 1;
       int execvp_status_code = execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
