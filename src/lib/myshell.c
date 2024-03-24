@@ -35,8 +35,15 @@ int main (int argc, char **argv)
 
     char result[MAX_BUFFER]; // https://stackoverflow.com/questions/143174/how-do-i-get-the-directory-that-a-program-is-running-from
     //readlink("/proc/self/exe", result, MAX_BUFFER);
-    setenv("SHELL", getenv("PWD"), 1);
-    setenv("PARENT", getenv("PWD"), 1);
+    //strcat(result, getenv("PWD"));
+    char cwd[MAX_BUFFER]; // https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        printf("Error getting the current working directory.\n");
+        exit(EXIT_FAILURE);
+    }
+    strcpy(result, cwd);
+    strcat(result, "/myshell");
+    setenv("SHELL", result, 1);
     
     if (!argv[1]) { // if no args given (not batchmode), display welcome message to user
         welcome();
@@ -117,7 +124,7 @@ int main (int argc, char **argv)
                 process_stdin(args, stdin_arg_file, args_cleaned);
             }    
             if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 1) {
-                process_stdin_stdout(args, redirection_create_append, stdout_arg_file, stdin_arg_file, args_cleaned);
+                process_stdin_stdout(args, redirection_create_append, stdin_arg_file, stdout_arg_file, args_cleaned);
             }          
         }
     }
