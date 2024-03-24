@@ -81,7 +81,7 @@ void fork_exec(char **args, char result[MAX_BUFFER]) {
 int background_execute(char **args) {
   pid_t pid = fork();
   if (pid < 0) {
-		fprintf(stderr, "Fork Failed\n");
+		fprintf(stderr, "Fork Failed\n"); // if fork fails, print error message and return
 		return 1;
 	}
 	else if (pid == 0) {

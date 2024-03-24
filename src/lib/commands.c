@@ -47,7 +47,7 @@ int command_quit() { // clean exit upon quit
 
 int command_echo(char * args[MAX_ARGS]) {
     for (int i = 1; args[i] != NULL; i++) {
-        if (!strcmp(args[i],">")) {
+        if (!strcmp(args[i],">") || !strcmp(args[i],">>") || !strcmp(args[i],"&")){
             break; // stops printing if redirection symbol is found (allows echo test > test.txt to work instead of outputting "> test.txt" to the file)
         }
         else {
@@ -100,7 +100,7 @@ int command_cd(char * args[MAX_ARGS]) {
         // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
         FILE *dir_file_blank;
         char blank_pwd[MAX_BUFFER] = "";
-        dir_file_blank = popen("pwd", "r");
+        dir_file_blank = popen("pwd", "r"); // if no arguments are provided, open and then print the current working directory
         if (dir_file_blank == NULL) {
             printf("Failed to run command\n" );
             return 1;
@@ -110,13 +110,13 @@ int command_cd(char * args[MAX_ARGS]) {
             printf("%s", blank_pwd);
         }
     } 
-    else if (args[1]) {
+    else if (args[1]) { // if args are provided, change the directory
         int dir_status = chdir(args[1]);
         if(dir_status == -1) {
             printf("Directory not found.\n");
             return 1;
         }
-        if (dir_status == 0) {
+        if (dir_status == 0) { // if directory is successfully changed, update the PWD environment variable
             char newcd[MAX_BUFFER] = "";
             FILE *dir_file_pointer;
             char new_pwd[MAX_BUFFER]= "";
@@ -129,10 +129,10 @@ int command_cd(char * args[MAX_ARGS]) {
                 strcat(newcd, new_pwd);
             }
             int size = strlen(newcd);
-            if (newcd[size - 1] == '\n') {
+            if (newcd[size - 1] == '\n') { // remove newline character from the end of the string
                 newcd[size - 1] = '\0';
             }
-            setenv("PWD", newcd, 1);
+            setenv("PWD", newcd, 1); // update environment variable
         }
     }
     return 1;         

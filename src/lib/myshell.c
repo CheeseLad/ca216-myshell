@@ -23,7 +23,7 @@ char *getenv(const char *name); // get's the value of an environment variable
 extern int errno;        // system error number 
 void syserr(char* );     // error report and abort routine 
 
-int main (int argc, char **argv)
+int main (int argc, char **argv) // starter code adapted from CA216 Lab04/05 // https://loop.dcu.ie/mod/book/view.php?id=2322719
 {
     char input[MAX_BUFFER];         // line buffer
     char *args[MAX_ARGS];           // pointers to arg strings
@@ -71,9 +71,9 @@ int main (int argc, char **argv)
             int arg_count = 0;
             for (int i = 0; args[i] != NULL; i++) { // loop through the args to find redirection symbols
                 if(!strcmp(args[i], "<") && args[i + 1]) {
-                    redirection_stdin = 1;
+                    redirection_stdin = 1; // update flags accordingly
                     stdin_arg_file = i + 1;
-                    stop = 1;
+                    stop = 1; // stop adding arguments to the arg_filter (we don't want to include the redirection symbol in the command)
                 }
                 if(!strcmp(args[i], ">") && args[i + 1]) {
                     redirection_stdout = 1;
