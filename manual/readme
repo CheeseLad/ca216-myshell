@@ -1,50 +1,60 @@
------------------------------------
-Welcome to MyShell by Jake Farrell - 22349856
+NAME
+      myshell
 
-    Description of operation and commands (10 marks)
+SYNOPSIS
+      myshell [command_name] [arguments] [options] [file_name]
 
-MyShell is a fully-featured shell written in C that can execute commands, redirect input and output and execute processes in the background.
+DESCRIPTION
 
+      MyShell is a fully-featured shell written in C that can execute commands, redirect input and output and execute processes in the background.
 
-List of built-in commands:
-    - cd: Change directory
-    - clr: Clear the screen
-    - dir: List the contents of the current directory
-    - environ: List all environment variables
-    - echo: Print a string to the console
-    - help: Display the user manual
-    - pause: Pause the shell until the user presses enter
-    - quit: Exit the shell
+BUILT-IN COMMANDS
 
-    Description of environment concepts (10 marks)
-ENVIROM
+      cd [arguments]: Change directory
+      clr: Clear the screen
+      dir [arguments]: List the contents of the current directory
+      environ: List all environment variables
+      echo: Print a string to the console
+      help: Display the user manual
+      pause: Pause the shell until the user presses enter
+      quit: Exit the shell
+      
+ENVIRONMENT
 
-Upon starting up MyShell, a new enviroment variable called `SHELL` is created and set to the path where the shell executable is located.
-The command `environ` can be used to list all of the environment variables currently set on the system.
-When executing a non-built-in command, an environment variable called `PARENT` is created and links to where the shell executable is stored.
+      Upon starting up MyShell, a new environment variable called `SHELL` is created and set to the path where the shell executable is located.
+      The command `environ` can be used to list all of the environment variables currently set on the system.
+      When executing a non-built-in command, an environment variable called `PARENT` is created and links to where the shell executable is stored.
 
+I/O REDIRECTION
 
-    Description of i/o redirection (10 marks)
+      Redirecting to stdout has multiple options:
+            `>`: Redirects the output of a command to a file, overwriting the file if it already exists, the file will be created if it does not exist
+                  Example: `ls > file.txt`
+            `>>`: Redirects the output of a command to a file, appending to the file if it already exists, the file will be created if it does not exist
+                  Example: `ls >> file.txt`
 
-    Redirecting to stdout has multiple options:
+      Redirecting to stdin has one option:
+            `<`: Redirects the input of a command to a file
+                  Example: `cat < file.txt`
+            
+      Error handling is in place for both redirections, alerting the user if the file does not exist or cannot be opened.
 
-    - `>`: Redirects the output of a command to a file, overwriting the file if it already exists
-    - `>>`: Redirects the output of a command to a file, appending to the file if it already exists
-    - 
-    Description of the process concept, and the differences between background and foreground execution (5 marks)
-
-    Overall layout and display of understanding (10 marks)
-
-    Inclusion of four references from peer-reviewed sources such as books, articles etc. (5 marks). Note that the inclusion of Wikipedia, or a random website which just happened to come up in a Google search will result in a grade of 0 for this aspect.
-
-    [1] B. Fox and C. Ramey, “Bash(1): GNU bourne-again shell - linux man page,” bash(1): GNU Bourne-Again SHell - Linux man page, https://linux.die.net/man/1/bash (accessed Mar. 23, 2024). 
-    
-    [2]
-    [3]
-    [4]
-
+      The following internal commands can be redirected to stdout:
+            `dir`, `environ`, `echo`, `help`
 
 
-Name: Jake Farrell
-Student Number: 22349856
-I acknowledge the DCU Academic Integrity Policy in this submitted work
+REFERENCES
+
+      [1] B. Fox and C. Ramey, “Bash(1): GNU bourne-again shell - linux man page,” bash(1): GNU Bourne-Again SHell - Linux man page, https://linux.die.net/man/1/bash (accessed Mar. 23, 2024). 
+
+      [2] A. Silberschatz, P. B. Galvin, and G. Gagne, Operating System Concepts. Hoboken, NJ: Wiley, 2018. 
+      
+      [3]
+      
+      [4]
+
+AUTHOR
+
+      Name: Jake Farrell
+      Student Number: 22349856
+      I acknowledge the DCU Academic Integrity Policy in this submitted work

@@ -18,13 +18,24 @@ I acknowledge the DCU Academic Integrity Policy in this submitted work
 void batchmode(char batchfile[MAX_BUFFER]) {
   FILE* pBatchfile;
   char reading[MAX_BUFFER];
-      char * args[MAX_ARGS];                     // pointers to arg strings
-    char ** arg;      
-    char input_before2[MAX_BUFFER];
+  char input_before_batchmode[MAX_BUFFER];
+  char * args_batchmode[MAX_ARGS];                     // pointers to arg strings
+  char ** arg_batchmode;      
   pBatchfile = fopen(batchfile, "r");
 
-  while(fgets(reading, MAX_BUFFER, pBatchfile)) { // https://stackoverflow.com/questions/3501338/c-read-file-line-by-line
-    system(reading);
+  if(fgets(reading, MAX_BUFFER, pBatchfile)) { // https://stackoverflow.com/questions/3501338/c-read-file-line-by-line
+    arg_batchmode = args_batchmode;
+    strcpy(input_before_batchmode, reading);
+    *arg_batchmode++ = strtok(reading,SEPARATORS);   // tokenize input
+    while ((*arg_batchmode++ = strtok(NULL,SEPARATORS)));
+
+    if (args_batchmode[0]) {
+      args_batchmode[strcspn(*args_batchmode, "\n")] = '\0'; // make newline charcter at the end of a line into a null character
+      int status = command(args_batchmode);
+        if (status == 0) {
+          system(input_before_batchmode);
+        }
+    }
   }
   fclose(pBatchfile);
   exit(0);
@@ -111,7 +122,7 @@ int fork_exec(char **args, char result[MAX_BUFFER]) {
                         //printf("%s", getenv("PARENT"));
                         int execvp_status_code = execvp(args[0], args);
                         if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
-                            printf("Terminated Incorrectly\n");
+                            printf("External command did not run successfully, maybe `%s` was a typo?\n", args[0]);
                             return 1;
                         }
                         return 1;
@@ -138,7 +149,7 @@ int background_execute(char **args) {
                     if (status == 0) {
                         int execvp_status_code = execvp(args[0], args);
                         if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
-                            printf("Terminated Incorrectly\n");
+                            printf("External command did not run successfully, maybe `%s` was a typo?\n", args[0]);
                             return 1;
                         }
                     }
@@ -170,8 +181,10 @@ void process_stdout(char **args, int redirection_create_append, int stdout_arg_f
                 int status = command(args);
                 if (status == 0) {
                     toggle = 1;
-                    execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
-                    //background_execute(args);
+                    int execvp_status_code = execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                        if (execvp_status_code == -1) {
+                            printf("External command did not run successfully, maybe `%s` was a typo?\n", args[0]);
+                        }
                 }
                 fclose(stdout_pointer);
 	            } else {
@@ -198,7 +211,10 @@ void process_stdin(char **args, int stdin_arg_file, char **args2) {
                     
                 int status = command(args2);
                 if (status == 0) {
-                    execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                        int execvp_status_code = execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                        if (execvp_status_code == -1) {
+                            printf("External command did not run successfully, maybe `%s` was a typo?\n", args[0]);
+                        }
                 }
                 fclose(stdin_pointer);
               } 
