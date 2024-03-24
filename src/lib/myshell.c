@@ -32,9 +32,14 @@ int main (int argc, char ** argv)
     char ** arg;                               // working pointer thru args
     char batchfile[MAX_BUFFER];
 
+            char * args2[MAX_ARGS];                     // pointers to arg strings
+            char ** arg2;                               // working pointer thru args
+    
+
     char result[MAX_BUFFER]; // https://stackoverflow.com/questions/143174/how-do-i-get-the-directory-that-a-program-is-running-from
-    readlink("/proc/self/exe", result, MAX_BUFFER);
-    setenv("SHELL", result, 1);
+    //readlink("/proc/self/exe", result, MAX_BUFFER);
+    setenv("SHELL", getenv("PWD"), 1);
+    setenv("PARENT", getenv("PWD"), 1);
     
     if (!argv[1]) { // if no args given (not batchmode), display welcome message to user
         welcome();
@@ -47,12 +52,12 @@ int main (int argc, char ** argv)
             batchmode(batchfile);
         }
         
-        
+                        char arg_filter[MAX_BUFFER] = "";
         printf("%s - %s --> ", getenv("PWD"), getenv("USER"));  // creates the prompt with the current working directory and user
         if (fgets (input, MAX_BUFFER, stdin )) { // read a line
 
 /* tokenize the input into args array */
-
+            
             arg = args;
             strcpy(input_before, input);
             *arg++ = strtok(input,SEPARATORS);   // tokenize input
@@ -65,24 +70,40 @@ int main (int argc, char ** argv)
             int redirection_create_append = 0;
             int stdout_arg_file = 0;
             int stdin_arg_file = 0;
+            int stop = 0;
 
             int arg_count = 0;
             for (int i = 0; args[i] != NULL; i++) {
-                arg_count++;
                 if(!strcmp(args[i], "<") && args[i + 1]) {
                     redirection_stdin = 1;
                     stdin_arg_file = i + 1;
+                    stop = 1;
                 }
                 if(!strcmp(args[i], ">") && args[i + 1]) {
                     redirection_stdout = 1;
                     stdout_arg_file = i + 1;
+                    stop = 1;
                 }
                 if(!strcmp(args[i], ">>") && args[i + 1]) {
                     redirection_stdout = 1;
                     redirection_create_append = 1;
                     stdout_arg_file = i + 1;
+                    stop = 1;
+                }
+                if (stop == 0) {
+                    arg_count++;
                 }
             }
+            for (int i = 0; i < arg_count; i++) {
+                strcat(arg_filter, args[i]);
+                //printf("Arg filter: %s\n", arg_filter);
+            }
+            //printf("Result: %s\n", arg_filter);
+            arg2 = args2;
+            *arg2++ = strtok(arg_filter,SEPARATORS);   // tokenize input
+            while ((*arg2++ = strtok(NULL,SEPARATORS)));
+
+
             if (arg_count > 1) {
                 if (!strcmp(args[arg_count - 1],"&")) {
                     background_execution = 1;
@@ -91,60 +112,47 @@ int main (int argc, char ** argv)
             if (args[0] && background_execution == 1) {
                 background_execute(args);
             }
-            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 0) {                     // if there's anything there
+            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 0) {
                 int status = command(args);
                 if (status == 0) {
                     fork_exec(args, result);
                 }
             } 
-            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 0) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                FILE *stdout_pointer;
-                stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
-                int status = command(args);
-                if (status == 0) {
-                    int execvp_status_code = execvp(args[0], args);
-                    if (execvp_status_code == -1) { // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
-                        printf("Terminated Incorrectly\n");
-                        return 1;
-                    }
-                        //system(input_before);
-                        
-                        //execlp(args[0], input_before);
-                    }
-                    fclose(stdout_pointer);
+            if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 0) { 
+                process_stdout(args, redirection_create_append, stdout_arg_file, args2);
             }
+            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
+                process_stdin(args, stdin_arg_file, args2);
+            }    
             if (args[0] && background_execution == 0 && redirection_stdout == 1 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
                 FILE *stdin_pointer;
                 FILE *stdout_pointer;
                 stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
+                if (stdin_pointer == NULL) {
+                    printf("Input file was not found.\n");
+                    break;
+                }
                 if (redirection_create_append == 0) {
                     stdout_pointer = freopen(args[stdout_arg_file], "w", stdout);
+                    if (stdout_pointer == NULL) {
+                        printf("Output file was not found.\n");
+                        break;
+                    }
                 } else {
                     stdout_pointer = freopen(args[stdout_arg_file], "a", stdout);
+                    if (stdout_pointer == NULL) {
+                        printf("Output file was not found.\n");
+                        break;
+                    }
                 }
                     
-                int status = command(args);
+                int status = command(args2);
                 if (status == 0) {
-                    system(input_before);
-                        //fclose(stdout_pointer);
-                        //execlp(args[0], input_before);
-                    }
+                    execvp(args[0], args2); // https://www.digitalocean.com/community/tutorials/execvp-function-c-plus-plus
+                }
                 fclose(stdin_pointer);
                 fclose(stdout_pointer);
-            }
-            if (args[0] && background_execution == 0 && redirection_stdout == 0 && redirection_stdin == 1) { // https://www.tutorialspoint.com/c_standard_library/c_function_freopen.htm
-                FILE *stdin_pointer;
-                stdin_pointer = freopen(args[stdin_arg_file], "r", stdin);
-                    
-                int status = command(args);
-                if (status == 0) {
-                    system(input_before);
-                        //fclose(stdout_pointer);
-                        //execlp(args[0], input_before);
-                }
-                fclose(stdin_pointer);
-                break;
-            }              
+            }          
         }
     }
 }

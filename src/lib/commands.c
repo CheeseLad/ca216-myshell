@@ -63,60 +63,73 @@ int command_help() {
             putchar(c);
         fclose(pfile_help);
     }
-    printf("\n----------------------------------");
-    printf("\nPress the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
-    getchar();   
+    printf("\n----------------------------------\n");
+    //printf("\nPress the ENTER key to continue... ");  // https://stackoverflow.com/questions/18801483/press-any-key-to-continue-function-in-c
+    //getchar();   
     return 1;
 }
 
-int command_dir() {
+int command_dir(char * args[MAX_ARGS]) {
     DIR *dp;
-    struct dirent *ep;     
+    struct dirent *ep;
+    if (args[1] != NULL) {
+        dp = opendir(args[1]);
+    } else {     
     dp = opendir ("./");
+    }
     if (dp != NULL) {
-        while ((ep = readdir (dp)) != NULL) { }
+        while ((ep = readdir (dp)) != NULL) { 
+            printf("%s\n", ep->d_name);
+        }
           
     (void) closedir (dp);
     
   }
-  return 0;
+  return 1;
 }
 
 int command_cd(char * args[MAX_ARGS]) {
     if (args[1] == NULL) {
-                        // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
-                        FILE *dir_file_blank;
-                        char blank_pwd[MAX_BUFFER];
-                        dir_file_blank = popen("pwd", "r");
-                        if (dir_file_blank == NULL) {
-                            printf("Failed to run command\n" );
-                            return 1;
-                        }
+        // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
+        FILE *dir_file_blank;
+        char blank_pwd[MAX_BUFFER];
+        dir_file_blank = popen("pwd", "r");
+        if (dir_file_blank == NULL) {
+            printf("Failed to run command\n" );
+            return 1;
+        }
 
-                        while (fgets(blank_pwd, sizeof(blank_pwd), dir_file_blank) != NULL) {
-                            printf("%s", blank_pwd);
-  }
-                    } else if (args[1]) {
-                        int dir_status = chdir(args[1]);
-                        if(dir_status == -1) {
-                            printf("Directory not found.\n");
-                        }
-                        if (dir_status == 0) {
-                            char newcd[MAX_BUFFER];
-                            strcpy(newcd, "PWD="); // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
-                            FILE *dir_file_pointer;
-                            char new_pwd[MAX_BUFFER];
-                            dir_file_pointer = popen("pwd", "r");
-  if (dir_file_pointer == NULL) {
-      printf("Failed to run command\n" );
-      return 1;
-  }
+        while (fgets(blank_pwd, sizeof(blank_pwd), dir_file_blank) != NULL) {
+            printf("%s", blank_pwd);
+        }
+    } else if (args[1]) {
+        int dir_status = chdir(args[1]);
+        if(dir_status == -1) {
+            printf("Directory not found.\n");
+        }
+        if (dir_status == 0) {
+            char newcd[MAX_BUFFER];
+            //strcpy(newcd, "PWD="); // https://stackoverflow.com/questions/17695413/store-output-of-systemfile-command-as-a-string-in-c
+            FILE *dir_file_pointer;
+            char new_pwd[MAX_BUFFER];
+            dir_file_pointer = popen("pwd", "r");
+            if (dir_file_pointer == NULL) {
+                printf("Failed to run command\n");
+                return 1;
+                
+            }
 
-  while (fgets(new_pwd, sizeof(new_pwd), dir_file_pointer) != NULL) {
-      strcat(newcd, new_pwd);
-  }
-                            putenv(newcd);
-                        }
+            while (fgets(new_pwd, sizeof(new_pwd), dir_file_pointer) != NULL) {
+                strcat(newcd, new_pwd);
+            }
+            //putenv(newcd);
+            int size = strlen(newcd);
+            if (newcd[size - 1] == '\n') {
+                newcd[size - 1] = '\0';
+            }
+                
+                setenv("PWD", newcd, 1);
+            }
                     }
                     return 1;
                 
@@ -132,7 +145,7 @@ int command(char * args[MAX_ARGS]) {
     }
 
     else if (!strcmp(args[0],"dir")) { // "dir" command
-        return command_dir();
+        return command_dir(args);
     }
 
     else if (!strcmp(args[0], "help")) { // "help" command

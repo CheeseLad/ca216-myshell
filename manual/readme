@@ -5,9 +5,9 @@ Welcome to MyShell by Jake Farrell - 22349856
 
 MyShell is a fully-featured shell written in C that can execute commands, redirect input and output and execute processes in the background.
 
+
 List of built-in commands:
     - cd: Change directory
-    - 
     - clr: Clear the screen
     - dir: List the contents of the current directory
     - environ: List all environment variables
@@ -17,6 +17,7 @@ List of built-in commands:
     - quit: Exit the shell
 
     Description of environment concepts (10 marks)
+ENVIROM
 
 Upon starting up MyShell, a new enviroment variable called `SHELL` is created and set to the path where the shell executable is located.
 The command `environ` can be used to list all of the environment variables currently set on the system.

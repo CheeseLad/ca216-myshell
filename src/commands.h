@@ -12,5 +12,5 @@ int command_environ();
 int command_quit();
 int command_echo(char * args[MAX_ARGS]);
 int command_help();
-int command_dir();
+int command_dir(char * args[MAX_ARGS]);
 int command_cd(char * args[MAX_ARGS]);

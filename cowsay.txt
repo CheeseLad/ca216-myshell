@@ -1,1 +1,2 @@
 cowsay habibi
+cowsay -f tux habibi
