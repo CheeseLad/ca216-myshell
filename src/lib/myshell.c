@@ -24,16 +24,15 @@ char *getenv(const char *name);
 extern int errno;        // system error number 
 void syserr(char* );     // error report and abort routine 
 
-int main (int argc, char ** argv)
+int main (int argc, char **argv)
 {
     char input[MAX_BUFFER];                      // line buffer
     char input_before[MAX_BUFFER];
-    char * args[MAX_ARGS];                     // pointers to arg strings
-    char ** arg;                               // working pointer thru args
+    char *args[MAX_ARGS];                     // pointers to arg strings
+    char **arg;                               // working pointer thru args
     char batchfile[MAX_BUFFER];
-
-            char * args2[MAX_ARGS];                     // pointers to arg strings
-            char ** arg2;                               // working pointer thru args
+    char *args2[MAX_ARGS];                     // pointers to arg strings
+    char **arg2;                               // working pointer thru args
     
 
     char result[MAX_BUFFER]; // https://stackoverflow.com/questions/143174/how-do-i-get-the-directory-that-a-program-is-running-from
