@@ -1,5 +1,7 @@
 # CA216 Operating Systems: myshell
 
+# Project Grade: 99%
+
 ## Introduction
 This is the starter repository for the _ca216 Operating Systems_ project entitled `myshell` and which you must complete individually.
 The assignment description can be found at: https://loop.dcu.ie/mod/assign/view.php?id=2326066
