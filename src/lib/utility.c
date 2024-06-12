@@ -1,6 +1,6 @@
 /* 
 Name: Jake Farrell
-Student Number: 22349856
+Student Number: 22XXXXXX
 I acknowledge the DCU Academic Integrity Policy in this submitted work
 */
 
@@ -53,7 +53,7 @@ void welcome() {
   printf("______________________________________________________________________________________\n");
   printf("|                                                                                    |\n");
   printf("|                               Welcome to MyShell                                   |\n");
-  printf("|                     Creator: Jake Farrell - 22349856                               |\n");
+  printf("|                     Creator: Jake Farrell - 22XXXXXX                               |\n");
   printf("|                  For help, please run the 'help' command                           |\n");
   printf("|                                                                                    |\n");
   printf("______________________________________________________________________________________\n");
